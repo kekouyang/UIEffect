@@ -60,6 +60,8 @@ Shader "Hidden/UI/Default (UIDissolve)"
 			#pragma multi_compile __ UNITY_UI_ALPHACLIP
 			#pragma multi_compile __ ADD SUBTRACT FILL
 
+  			#pragma multi_compile_local _ UNITY_UI_CLIP_RECT
+
 			#include "UnityCG.cginc"
 			#include "UnityUI.cginc"
 
@@ -79,6 +81,7 @@ Shader "Hidden/UI/Default (UIDissolve)"
 				clip (color.a - 0.001);
 				#endif
 
+				color = ApplyRect2DMaskSoftness(color, _ClipRect, IN.mask);
 				return color;
 			}
 		ENDCG

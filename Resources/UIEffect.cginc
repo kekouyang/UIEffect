@@ -305,5 +305,13 @@ half4 ApplyHsvEffect(half4 color, half param)
 	return color;
 }
 
+// Apply Rect2D Mask Soft effect.
+inline fixed4 ApplyRect2DMaskSoftness(fixed4 color, float4 clipRect, float4 mask){
+    #ifdef UNITY_UI_CLIP_RECT
+        half2 m = saturate((clipRect.zw - clipRect.xy - abs(mask.xy)) * mask.zw);
+        color.a *= m.x * m.y;
+    #endif
+    return color;
+}
 
 #endif // UI_EFFECT_INCLUDED

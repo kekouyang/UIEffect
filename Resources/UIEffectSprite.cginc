@@ -6,6 +6,8 @@ fixed4 _TextureSampleAdd;
 float4 _ClipRect;
 sampler2D _MainTex;
 float4 _MainTex_TexelSize;
+float _UIMaskSoftnessX;
+float _UIMaskSoftnessY;
 
 struct appdata_t
 {
@@ -34,6 +36,7 @@ struct v2f
 #if EX
 	half4	uvMask	: TEXCOORD3;
 #endif
+    float4  mask : TEXCOORD4;
 	UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -50,7 +53,7 @@ v2f vert(appdata_t IN)
 	#else
 	OUT.texcoord = UnpackToVec2(IN.texcoord.x);
 	#endif
-	
+
 	#ifdef UNITY_HALF_TEXEL_OFFSET
 	OUT.vertex.xy += (_ScreenParams.zw-1.0)*float2(-1,1);
 	#endif
@@ -68,6 +71,11 @@ v2f vert(appdata_t IN)
 	#if EX
 	OUT.uvMask = half4(UnpackToVec2(IN.uvMask.x), UnpackToVec2(IN.uvMask.y));
 	#endif
+
+	float2 pixelSize = OUT.vertex.w;
+	pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+    float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
+    OUT.mask = float4(IN.vertex.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 / (0.25 * half2(_UIMaskSoftnessX, _UIMaskSoftnessY) + abs(pixelSize.xy)));
 
 	return OUT;
 }

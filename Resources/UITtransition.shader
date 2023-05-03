@@ -1,57 +1,57 @@
 Shader "Hidden/UI/Default (UITransition)"
 {
-	Properties
-	{
-		[PerRendererData] _MainTex ("Main Texture", 2D) = "white" {}
-		_Color ("Tint", Color) = (1,1,1,1)
+    Properties
+    {
+        [PerRendererData] _MainTex ("Main Texture", 2D) = "white" {}
+        _Color ("Tint", Color) = (1,1,1,1)
 
-		_StencilComp ("Stencil Comparison", Float) = 8
-		_Stencil ("Stencil ID", Float) = 0
-		_StencilOp ("Stencil Operation", Float) = 0
-		_StencilWriteMask ("Stencil Write Mask", Float) = 255
-		_StencilReadMask ("Stencil Read Mask", Float) = 255
+        _StencilComp ("Stencil Comparison", Float) = 8
+        _Stencil ("Stencil ID", Float) = 0
+        _StencilOp ("Stencil Operation", Float) = 0
+        _StencilWriteMask ("Stencil Write Mask", Float) = 255
+        _StencilReadMask ("Stencil Read Mask", Float) = 255
 
-		_ColorMask ("Color Mask", Float) = 15
+        _ColorMask ("Color Mask", Float) = 15
 
-		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
+        [Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
 
-		[Header(Transition)]
-		_TransitionTex ("Transition Texture (A)", 2D) = "white" {}
-		_ParamTex ("Parameter Texture", 2D) = "white" {}
-	}
+        [Header(Transition)]
+        _TransitionTex ("Transition Texture (A)", 2D) = "white" {}
+        _ParamTex ("Parameter Texture", 2D) = "white" {}
+    }
 
-	SubShader
-	{
-		Tags
-		{
-			"Queue"="Transparent"
-			"IgnoreProjector"="True"
-			"RenderType"="Transparent"
-			"PreviewType"="Plane"
-			"CanUseSpriteAtlas"="True"
-		}
+    SubShader
+    {
+        Tags
+        {
+            "Queue"="Transparent"
+            "IgnoreProjector"="True"
+            "RenderType"="Transparent"
+            "PreviewType"="Plane"
+            "CanUseSpriteAtlas"="True"
+        }
 
-		Stencil
-		{
-			Ref [_Stencil]
-			Comp [_StencilComp]
-			Pass [_StencilOp]
-			ReadMask [_StencilReadMask]
-			WriteMask [_StencilWriteMask]
-		}
+        Stencil
+        {
+            Ref [_Stencil]
+            Comp [_StencilComp]
+            Pass [_StencilOp]
+            ReadMask [_StencilReadMask]
+            WriteMask [_StencilWriteMask]
+        }
 
-		Cull Off
-		Lighting Off
-		ZWrite Off
-		ZTest [unity_GUIZTestMode]
-		Blend SrcAlpha OneMinusSrcAlpha
-		ColorMask [_ColorMask]
+        Cull Off
+        Lighting Off
+        ZWrite Off
+        ZTest [unity_GUIZTestMode]
+        Blend SrcAlpha OneMinusSrcAlpha
+        ColorMask [_ColorMask]
 
-		Pass
-		{
-			Name "Default"
+        Pass
+        {
+            Name "Default"
 
-		CGPROGRAM
+            CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 2.0
@@ -61,6 +61,8 @@ Shader "Hidden/UI/Default (UITransition)"
 			#pragma multi_compile __ UNITY_UI_ALPHACLIP
 
 			#pragma multi_compile __ FADE CUTOFF DISSOLVE
+            #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
+            
 			#include "UnityCG.cginc"
 			#include "UnityUI.cginc"
 
@@ -78,10 +80,10 @@ Shader "Hidden/UI/Default (UITransition)"
 				#if UNITY_UI_ALPHACLIP
 				clip (color.a - 0.001);
 				#endif
-
+				color = ApplyRect2DMaskSoftness(color, _ClipRect, IN.mask);
 				return color;
 			}
 		ENDCG
-		}
-	}
+        }
+    }
 }
