@@ -1,55 +1,55 @@
 ﻿Shader "Hidden/UI/Default (UIEffect)"
 {
-	Properties
-	{
-		[PerRendererData] _MainTex ("Main Texture", 2D) = "white" {}
-		_Color ("Tint", Color) = (1,1,1,1)
+    Properties
+    {
+        [PerRendererData] _MainTex ("Main Texture", 2D) = "white" {}
+        _Color ("Tint", Color) = (1,1,1,1)
 
-		_StencilComp ("Stencil Comparison", Float) = 8
-		_Stencil ("Stencil ID", Float) = 0
-		_StencilOp ("Stencil Operation", Float) = 0
-		_StencilWriteMask ("Stencil Write Mask", Float) = 255
-		_StencilReadMask ("Stencil Read Mask", Float) = 255
+        _StencilComp ("Stencil Comparison", Float) = 8
+        _Stencil ("Stencil ID", Float) = 0
+        _StencilOp ("Stencil Operation", Float) = 0
+        _StencilWriteMask ("Stencil Write Mask", Float) = 255
+        _StencilReadMask ("Stencil Read Mask", Float) = 255
 
-		_ColorMask ("Color Mask", Float) = 15
+        _ColorMask ("Color Mask", Float) = 15
 
-		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
+        [Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
 
-		_ParamTex ("Parameter Texture", 2D) = "white" {}
-	}
+        _ParamTex ("Parameter Texture", 2D) = "white" {}
+    }
 
-	SubShader
-	{
-		Tags
-		{
-			"Queue"="Transparent"
-			"IgnoreProjector"="True"
-			"RenderType"="Transparent"
-			"PreviewType"="Plane"
-			"CanUseSpriteAtlas"="True"
-		}
+    SubShader
+    {
+        Tags
+        {
+            "Queue"="Transparent"
+            "IgnoreProjector"="True"
+            "RenderType"="Transparent"
+            "PreviewType"="Plane"
+            "CanUseSpriteAtlas"="True"
+        }
 
-		Stencil
-		{
-			Ref [_Stencil]
-			Comp [_StencilComp]
-			Pass [_StencilOp]
-			ReadMask [_StencilReadMask]
-			WriteMask [_StencilWriteMask]
-		}
+        Stencil
+        {
+            Ref [_Stencil]
+            Comp [_StencilComp]
+            Pass [_StencilOp]
+            ReadMask [_StencilReadMask]
+            WriteMask [_StencilWriteMask]
+        }
 
-		Cull Off
-		Lighting Off
-		ZWrite Off
-		ZTest [unity_GUIZTestMode]
-		Blend SrcAlpha OneMinusSrcAlpha
-		ColorMask [_ColorMask]
+        Cull Off
+        Lighting Off
+        ZWrite Off
+        ZTest [unity_GUIZTestMode]
+        Blend SrcAlpha OneMinusSrcAlpha
+        ColorMask [_ColorMask]
 
-		Pass
-		{
-			Name "Default"
+        Pass
+        {
+            Name "Default"
 
-		CGPROGRAM
+            CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#if !defined(SHADER_API_D3D11_9X) && !defined(SHADER_API_D3D9)
@@ -64,6 +64,8 @@
 			#pragma multi_compile __ ADD SUBTRACT FILL
 			#pragma multi_compile __ FASTBLUR MEDIUMBLUR DETAILBLUR
 			#pragma multi_compile __ EX
+
+            #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
 
 			#include "UnityCG.cginc"
 			#include "UnityUI.cginc"
@@ -104,10 +106,10 @@
 
 				color = ApplyColorEffect(color, fixed4(IN.color.rgb, colorFactor));
 				color.a *= IN.color.a;
-
+				color = ApplyRect2DMaskSoftness(color, _ClipRect, IN.mask);
 				return color;
 			}
 		ENDCG
-		}
-	}
+        }
+    }
 }
